@@ -6,7 +6,7 @@ services:
     networks:
       - dokploy-network
     labels:
-      # The shared middleware — defined once, reused by every MCP server
+      traefik.enable: "true"          # ← add this
       traefik.http.middlewares.mcp-auth.forwardauth.address: http://mcp-auth:9000/verify
       traefik.http.middlewares.mcp-auth.forwardauth.authResponseHeaders: X-Auth-User
 
