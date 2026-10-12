@@ -21,11 +21,11 @@ services:
     labels:
       traefik.enable: "true"
       traefik.docker.network: dokploy-network
-      traefik.http.routers.gadds.rule: Host(`gadds.mcp.trioflow.io`)
-      traefik.http.routers.gadds.entrypoints: websecure
-      traefik.http.routers.gadds.tls.certresolver: letsencrypt
-      traefik.http.routers.gadds.middlewares: mcp-auth@docker   # ← auth in one line
-      traefik.http.services.gadds.loadbalancer.server.port: 8080
+      traefik.http.routers.gads.rule: Host(`gads.mcp.trioflow.io`)
+      traefik.http.routers.gads.entrypoints: websecure
+      traefik.http.routers.gads.tls.certresolver: letsencrypt
+      traefik.http.routers.gads.middlewares: mcp-auth@docker   # ← auth in one line
+      traefik.http.services.gads.loadbalancer.server.port: 8080
 
 networks:
   dokploy-network:
