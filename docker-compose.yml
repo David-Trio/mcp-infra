@@ -29,6 +29,27 @@ services:
       traefik.http.routers.gads.service: gads                          # ← pin router to OUR service
       traefik.http.services.gads.loadbalancer.server.port: 8080
 
+  ga4-mcp:
+    build: ./ga4
+    env_file: .env
+    environment:
+      # GA4 uses a service account; Ads still uses the bot-user ADC.
+      # environment: overrides env_file for this service only.
+      GOOGLE_APPLICATION_CREDENTIALS: /secrets/ga4-sa.json
+    volumes:
+      - /opt/mcp/ga4-sa.json:/secrets/ga4-sa.json:ro
+    networks:
+      - dokploy-network
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: dokploy-network
+      traefik.http.routers.ga4.rule: Host(`ga4.mcp.trioflow.io`)
+      traefik.http.routers.ga4.entrypoints: websecure
+      traefik.http.routers.ga4.tls.certresolver: letsencrypt
+      traefik.http.routers.ga4.middlewares: mcp-auth@docker
+      traefik.http.routers.ga4.service: ga4                            # ← pin router to OUR service
+      traefik.http.services.ga4.loadbalancer.server.port: 8080
+
 networks:
   dokploy-network:
     external: true
