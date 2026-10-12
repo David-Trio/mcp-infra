@@ -6,13 +6,14 @@ services:
     networks:
       - dokploy-network
     labels:
-      traefik.enable: "true"          # ← add this
+      traefik.enable: "true"
       traefik.http.middlewares.mcp-auth.forwardauth.address: http://mcp-auth:9000/verify
       traefik.http.middlewares.mcp-auth.forwardauth.authResponseHeaders: X-Auth-User
+      traefik.http.services.mcp-auth.loadbalancer.server.port: 9000   # silences "port is missing"
 
   google-ads-mcp:
     build:
-      context: https://github.com/googleads/google-ads-mcp.git#main   # pin a commit SHA for reproducibility
+      context: https://github.com/googleads/google-ads-mcp.git#main
     env_file: .env
     volumes:
       - /opt/mcp/adc.json:/secrets/adc.json:ro
@@ -24,7 +25,8 @@ services:
       traefik.http.routers.gads.rule: Host(`gads.mcp.trioflow.io`)
       traefik.http.routers.gads.entrypoints: websecure
       traefik.http.routers.gads.tls.certresolver: letsencrypt
-      traefik.http.routers.gads.middlewares: mcp-auth@docker   # ← auth in one line
+      traefik.http.routers.gads.middlewares: mcp-auth@docker
+      traefik.http.routers.gads.service: gads                          # ← pin router to OUR service
       traefik.http.services.gads.loadbalancer.server.port: 8080
 
 networks:
