@@ -1,0 +1,32 @@
+services:
+  mcp-auth:
+    build: ./auth
+    volumes:
+      - /opt/mcp/tokens.json:/tokens/tokens.json:ro
+    networks:
+      - dokploy-network
+    labels:
+      # The shared middleware — defined once, reused by every MCP server
+      traefik.http.middlewares.mcp-auth.forwardauth.address: http://mcp-auth:9000/verify
+      traefik.http.middlewares.mcp-auth.forwardauth.authResponseHeaders: X-Auth-User
+
+  google-ads-mcp:
+    build:
+      context: https://github.com/googleads/google-ads-mcp.git#main   # pin a commit SHA for reproducibility
+    env_file: .env
+    volumes:
+      - /opt/mcp/adc.json:/secrets/adc.json:ro
+    networks:
+      - dokploy-network
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: dokploy-network
+      traefik.http.routers.gadds.rule: Host(`gadds.mcp.trioflow.io`)
+      traefik.http.routers.gadds.entrypoints: websecure
+      traefik.http.routers.gadds.tls.certresolver: letsencrypt
+      traefik.http.routers.gadds.middlewares: mcp-auth@docker   # ← auth in one line
+      traefik.http.services.gadds.loadbalancer.server.port: 8080
+
+networks:
+  dokploy-network:
+    external: true
