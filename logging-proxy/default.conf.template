@@ -1,0 +1,41 @@
+map $http_x_forwarded_for $client_ip {
+    ~^(?<forwarded_ip>[^,\s]+) $forwarded_ip;
+    default $remote_addr;
+}
+
+log_format mcp escape=json
+    '{"time":"$time_iso8601",'
+    '"service":"${SERVICE_NAME}",'
+    '"client_ip":"$client_ip",'
+    '"remote_addr":"$remote_addr",'
+    '"x_forwarded_for":"$http_x_forwarded_for",'
+    '"method":"$request_method",'
+    '"uri":"$request_uri",'
+    '"request_body":"$request_body",'
+    '"response_status":$status,'
+    '"request_time":$request_time,'
+    '"request_length":$request_length,'
+    '"bytes_sent":$body_bytes_sent}';
+
+server {
+    listen 8080;
+
+    client_max_body_size 10m;
+    client_body_buffer_size 1m;
+
+    access_log /logs/${SERVICE_NAME}.log mcp;
+
+    location / {
+        proxy_pass ${UPSTREAM};
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $client_ip;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $http_x_forwarded_proto;
+        proxy_set_header Connection "";
+        proxy_request_buffering on;
+        proxy_buffering off;
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
+    }
+}
