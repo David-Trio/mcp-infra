@@ -1,0 +1,6 @@
+# Runtime deps of google-ads-mcp @ 7452a9d (copied from its pyproject.toml)
+google-ads>=33.0.0
+mcp[cli]>=2.0.0,<3
+fastmcp[tasks]>=4.0.6,<5
+# Build backend, so the project installs with --no-build-isolation (no floating build deps)
+setuptools>=68

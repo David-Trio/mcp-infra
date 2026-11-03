@@ -1,6 +1,7 @@
 services:
   mcp-auth:
     build: ./logging-proxy
+    restart: unless-stopped
     environment:
       SERVICE_NAME: auth
       UPSTREAM: http://mcp-auth-app:9000
@@ -18,14 +19,15 @@ services:
 
   mcp-auth-app:
     build: ./auth
+    restart: unless-stopped
     volumes:
       - /opt/mcp/tokens.json:/tokens/tokens.json:ro
     networks:
       - dokploy-network
 
   google-ads-mcp:
-    build:
-      context: https://github.com/googleads/google-ads-mcp.git#main
+    build: ./gads   # pinned commit + lockfile; see gads/Dockerfile
+    restart: unless-stopped
     env_file: .env
     volumes:
       - /opt/mcp/adc.json:/secrets/adc.json:ro
@@ -34,6 +36,7 @@ services:
 
   gads:
     build: ./logging-proxy
+    restart: unless-stopped
     environment:
       SERVICE_NAME: gads
       UPSTREAM: http://google-ads-mcp:8080
@@ -55,6 +58,7 @@ services:
 
   ga4-mcp:
     build: ./ga4
+    restart: unless-stopped
     env_file: .env
     environment:
       # GA4 uses a service account; Ads still uses the bot-user ADC.
@@ -67,6 +71,7 @@ services:
 
   ga4:
     build: ./logging-proxy
+    restart: unless-stopped
     environment:
       SERVICE_NAME: ga4
       UPSTREAM: http://ga4-mcp:8080
@@ -87,8 +92,7 @@ services:
       traefik.http.services.ga4.loadbalancer.server.port: 8080
 
   gsc-mcp:
-    build:
-      context: https://github.com/AminForou/mcp-gsc.git#d49eea9e5efb5eb645b722249303179b2c150b49
+    build: ./gsc    # pinned commit + lockfile; see gsc/Dockerfile
     restart: unless-stopped
     environment:
       MCP_TRANSPORT: sse
@@ -103,6 +107,7 @@ services:
 
   gsc:
     build: ./logging-proxy
+    restart: unless-stopped
     environment:
       SERVICE_NAME: gsc
       UPSTREAM: http://gsc-mcp:8080
@@ -121,7 +126,7 @@ services:
       traefik.http.routers.gsc.middlewares: mcp-auth@docker
       traefik.http.routers.gsc.service: gsc
       traefik.http.services.gsc.loadbalancer.server.port: 8080
-      
+
 networks:
   dokploy-network:
     external: true
