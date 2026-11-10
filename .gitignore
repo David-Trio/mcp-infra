@@ -1,0 +1,2 @@
+# Secrets: real values live only on the server / in Dokploy
+.env

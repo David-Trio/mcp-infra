@@ -1,12 +1,13 @@
 # mcp-infra
 
-MCP servers (Google Ads, GA4, Search Console) behind Traefik + token auth, deployed with Dokploy.
+MCP servers (Google Ads, GA4, Search Console, apox) behind Traefik + token auth, deployed with Dokploy.
 
 | Service | Public host | Image built from |
 |---|---|---|
 | `google-ads-mcp` → `gads` | `gads.mcp.trioflow.io` | `gads/` (googleads/google-ads-mcp @ pinned commit) |
 | `ga4-mcp` → `ga4` | `ga4.mcp.trioflow.io` | `ga4/` (analytics-mcp + mcp-proxy) |
 | `gsc-mcp` → `gsc` | `gsc.mcp.trioflow.io` | `gsc/` (AminForou/mcp-gsc @ pinned commit) |
+| `apox-mcp` → `apox` | `apox.mcp.trioflow.io` | `apox/` (our own `server.py`, wraps the apox API) |
 | `mcp-auth-app` → `mcp-auth` | Traefik forward-auth | `auth/` |
 
 Each public service is an nginx logging proxy (`logging-proxy/`) in front of the real server.
@@ -43,6 +44,7 @@ Requires [`uv`](https://docs.astral.sh/uv/).
    | `ga4/analytics-mcp.lock` | `ga4/analytics-mcp.in` | 3.12 |
    | `ga4/mcp-proxy.lock` | `ga4/mcp-proxy.in` | 3.12 |
    | `gsc/requirements.lock` | `gsc/requirements.in` | 3.13 |
+   | `apox/requirements.lock` | `apox/requirements.in` | 3.12 |
 
    Add `--upgrade` to move every transitive dep to its latest version. Add `--upgrade-package <name>` to move only one.
 3. Review the lock diff, rebuild locally (`docker compose build <service>`), then deploy.
@@ -60,3 +62,11 @@ Find the new tag's digest, e.g. `docker buildx imagetools inspect python:3.12.17
 ## Gotcha: GA4 needs two virtualenvs
 
 `analytics-mcp` (needs `mcp>=2.3`) and `mcp-proxy` (needs `mcp<2`) can't share an environment. They only communicate over stdio, so `ga4/Dockerfile` installs each into its own venv. Keep them separate.
+
+## apox MCP
+
+`apox/server.py` is our own code: three tools over the apox API (`crawl`, `get_job`, `fetch_page`). It needs `APOX_BASE_URL`, `APOX_API_TOKEN` (apox's `NITRO_API_TOKEN`) and `APOX_TRIO_AUTH` (sent as the `x-trio-auth` header on every apox call) in `.env`.
+
+- `crawl` takes only a URL. The page fields are fixed in `CRAWL_PAGE_FIELDS`: everything except `html`.
+- `get_job` waits up to 30s on the server (`JOB_WAIT_SECONDS`), because the model can't sleep between calls.
+- `content` and `html` are stripped before results reach the model (`STRIPPED_PAGE_FIELDS`). `fetch_page` also drops `html`.
