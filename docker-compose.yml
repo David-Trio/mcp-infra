@@ -134,6 +134,7 @@ services:
       APOX_BASE_URL: ${APOX_BASE_URL}
       APOX_API_TOKEN: ${APOX_API_TOKEN}
       APOX_TRIO_AUTH: ${APOX_TRIO_AUTH}
+      APOX_JOB_WAIT_SECONDS: ${APOX_JOB_WAIT_SECONDS:-180}
     networks:
       - dokploy-network
 
