@@ -160,6 +160,38 @@ services:
       traefik.http.routers.apox.service: apox
       traefik.http.services.apox.loadbalancer.server.port: 8080
 
+  triotree-mcp:
+    build: ./triotree   # our own server.py; edits triotr.ee's profile.json via GitHub
+    restart: unless-stopped
+    environment:
+      TRIOTREE_GITHUB_TOKEN: ${TRIOTREE_GITHUB_TOKEN}
+      TRIOTREE_REPO: David-Trio/triotr.ee
+      TRIOTREE_BRANCH: main
+    networks:
+      - dokploy-network
+
+  triotree:
+    build: ./logging-proxy
+    restart: unless-stopped
+    environment:
+      SERVICE_NAME: triotree
+      UPSTREAM: http://triotree-mcp:8080
+    volumes:
+      - /opt/mcp/logs:/logs
+    depends_on:
+      - triotree-mcp
+    networks:
+      - dokploy-network
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: dokploy-network
+      traefik.http.routers.triotree.rule: Host(`triotree.mcp.trioflow.io`)
+      traefik.http.routers.triotree.entrypoints: websecure
+      traefik.http.routers.triotree.tls.certresolver: letsencrypt
+      traefik.http.routers.triotree.middlewares: mcp-auth@docker
+      traefik.http.routers.triotree.service: triotree
+      traefik.http.services.triotree.loadbalancer.server.port: 8080
+
 networks:
   dokploy-network:
     external: true
