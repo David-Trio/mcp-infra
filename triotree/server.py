@@ -34,13 +34,18 @@ from mcp.server.mcpserver.exceptions import ToolError
 from mcp.server.transport_security import TransportSecuritySettings
 from mcp.types import ToolAnnotations
 
-GITHUB_TOKEN = os.environ.get("TRIOTREE_GITHUB_TOKEN", "")
-REPO = os.environ.get("TRIOTREE_REPO", "David-Trio/triotr.ee")
-BRANCH = os.environ.get("TRIOTREE_BRANCH", "main")
-COMMIT_NAME = os.environ.get("TRIOTREE_COMMIT_NAME", "triotr.ee bot")
-COMMIT_EMAIL = os.environ.get("TRIOTREE_COMMIT_EMAIL", "bot@triotr.ee")
-if not GITHUB_TOKEN:
-    raise SystemExit("TRIOTREE_GITHUB_TOKEN must be set")
+REQUIRED_ENV = [
+    "TRIOTREE_GITHUB_TOKEN", "TRIOTREE_REPO", "TRIOTREE_BRANCH",
+    "TRIOTREE_COMMIT_NAME", "TRIOTREE_COMMIT_EMAIL",
+]
+_missing_env = [name for name in REQUIRED_ENV if not os.environ.get(name, "").strip()]
+if _missing_env:
+    raise SystemExit(f"Missing env: {', '.join(_missing_env)}")
+GITHUB_TOKEN = os.environ["TRIOTREE_GITHUB_TOKEN"].strip()
+REPO = os.environ["TRIOTREE_REPO"].strip()
+BRANCH = os.environ["TRIOTREE_BRANCH"].strip()
+COMMIT_NAME = os.environ["TRIOTREE_COMMIT_NAME"].strip()
+COMMIT_EMAIL = os.environ["TRIOTREE_COMMIT_EMAIL"].strip()
 
 PROFILE_PATH = "src/data/profile.json"
 ASSETS_DIR = "src/assets"

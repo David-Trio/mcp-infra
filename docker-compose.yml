@@ -165,8 +165,10 @@ services:
     restart: unless-stopped
     environment:
       TRIOTREE_GITHUB_TOKEN: ${TRIOTREE_GITHUB_TOKEN}
-      TRIOTREE_REPO: David-Trio/triotr.ee
-      TRIOTREE_BRANCH: main
+      TRIOTREE_REPO: ${TRIOTREE_REPO}
+      TRIOTREE_BRANCH: ${TRIOTREE_BRANCH}
+      TRIOTREE_COMMIT_NAME: ${TRIOTREE_COMMIT_NAME}
+      TRIOTREE_COMMIT_EMAIL: ${TRIOTREE_COMMIT_EMAIL}
     networks:
       - dokploy-network
 

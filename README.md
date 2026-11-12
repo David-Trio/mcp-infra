@@ -77,7 +77,7 @@ Find the new tag's digest, e.g. `docker buildx imagetools inspect python:3.12.17
 
 `triotree/server.py` is our own code. It lets Claude read and edit the triotr.ee link page. It only ever touches `src/data/profile.json` in `David-Trio/triotr.ee`, through the GitHub contents API, so there's no clone on the server. Each save is one commit to `main`, made by "triotr.ee bot", and Cloudflare deploys from there.
 
-It needs `TRIOTREE_GITHUB_TOKEN` in `.env`: a fine-grained token with access to **only** `David-Trio/triotr.ee` and the permission *Contents: Read and write*. The commit message names the editor from mcp-auth's `X-Auth-User` header.
+It needs these in `.env`: `TRIOTREE_REPO`, `TRIOTREE_BRANCH` (the branch Cloudflare deploys), `TRIOTREE_COMMIT_NAME`, `TRIOTREE_COMMIT_EMAIL` (the bot commit identity), and `TRIOTREE_GITHUB_TOKEN`, a fine-grained token with access to **only** `David-Trio/triotr.ee` and the permission *Contents: Read and write*. The commit message names the editor from mcp-auth's `X-Auth-User` header.
 
 - `get_profile` returns the file, its blob `sha`, and the image files in `src/assets`.
 - `update_profile` takes the **whole** new profile, the `sha` it was based on, and a short summary for the commit message. Before it commits, it checks:
